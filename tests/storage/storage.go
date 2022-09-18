@@ -539,7 +539,6 @@ var _ = SIGDescribe("Storage", func() {
 				}
 
 				dataVolume = libdv.NewDataVolume(
-					libdv.WithNamespace(util.NamespaceTestDefault),
 					libdv.WithRegistryURLSource(cd.DataVolumeImportUrlForContainerDisk(cd.ContainerDiskAlpine)),
 					libdv.WithPVC(sc, cd.CirrosVolumeSize, k8sv1.ReadWriteOnce, k8sv1.PersistentVolumeFilesystem),
 				)
@@ -550,7 +549,7 @@ var _ = SIGDescribe("Storage", func() {
 			})
 
 			It("should be successfully started and virtiofs could be accessed", func() {
-				_, err := virtClient.CdiClient().CdiV1beta1().DataVolumes(dataVolume.Namespace).Create(context.Background(), dataVolume, metav1.CreateOptions{})
+				dataVolume, err = virtClient.CdiClient().CdiV1beta1().DataVolumes(util.NamespaceTestDefault).Create(context.Background(), dataVolume, metav1.CreateOptions{})
 				Expect(err).ToNot(HaveOccurred())
 				By("Waiting until the DataVolume is ready")
 				if libstorage.IsStorageClassBindingModeWaitForFirstConsumer(libstorage.Config.StorageRWOFileSystem) {
@@ -1304,12 +1303,11 @@ var _ = SIGDescribe("Storage", func() {
 				}
 
 				dv = libdv.NewDataVolume(
-					libdv.WithNamespace(util.NamespaceTestDefault),
 					libdv.WithRegistryURLSource(cd.DataVolumeImportUrlForContainerDisk(cd.ContainerDiskCirros)),
 					libdv.WithPVC(sc, cd.CirrosVolumeSize, k8sv1.ReadWriteOnce, k8sv1.PersistentVolumeFilesystem),
 				)
 
-				_, err := virtClient.CdiClient().CdiV1beta1().DataVolumes(util.NamespaceTestDefault).Create(context.Background(), dv, metav1.CreateOptions{})
+				dv, err = virtClient.CdiClient().CdiV1beta1().DataVolumes(util.NamespaceTestDefault).Create(context.Background(), dv, metav1.CreateOptions{})
 				Expect(err).ToNot(HaveOccurred())
 				labelKey := "testshareablekey"
 				labels := map[string]string{
@@ -1498,12 +1496,9 @@ func createBlockDataVolume(virtClient kubecli.KubevirtClient) (*cdiv1.DataVolume
 	}
 
 	dataVolume := libdv.NewDataVolume(
-		libdv.WithNamespace(util.NamespaceTestDefault),
 		libdv.WithRegistryURLSource(cd.DataVolumeImportUrlForContainerDisk(cd.ContainerDiskCirros)),
 		libdv.WithPVC(sc, cd.CirrosVolumeSize, k8sv1.ReadWriteOnce, k8sv1.PersistentVolumeBlock),
 	)
 
-	_, err := virtClient.CdiClient().CdiV1beta1().DataVolumes(util.NamespaceTestDefault).Create(context.Background(), dataVolume, metav1.CreateOptions{})
-
-	return dataVolume, err
+	return virtClient.CdiClient().CdiV1beta1().DataVolumes(util.NamespaceTestDefault).Create(context.Background(), dataVolume, metav1.CreateOptions{})
 }
