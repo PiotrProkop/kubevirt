@@ -338,6 +338,8 @@ func (k *KubeVirtTestData) BeforeTest() {
 }
 
 func (k *KubeVirtTestData) AfterTest() {
+	err := mockEnvVarManager.Unsetenv(util.VirtOperatorImageEnvName)
+	Expect(err).NotTo(HaveOccurred())
 	close(k.stop)
 
 	// Ensure that we add checks for expected events to every test
